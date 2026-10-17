@@ -1,0 +1,151 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: #EAF4FD;
+  background-color: #0b132b;
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', system-ui, sans-serif;
+}
+
+input,
+button {
+  font-family: inherit;
+}
+
+header,
+main,
+footer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* header */
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+/* logo */
+.logo span {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.fa-magnifying-glass {
+  font-size: 0.8rem;
+}
+
+/* search-box */
+.search-box {
+  display: inline-flex;
+  justify-content: flex-start;
+  align-self: stretch;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  padding: 16px 32px;
+  margin-bottom: 12px;
+  background-color: #1A3047;
+  border-radius: 16px;
+  border: 1px solid #24394C;
+}
+
+#city-input {
+  flex: 1;
+  outline: none;
+  background-color: transparent;
+  border: none;
+  color: #EAF4FD;
+}
+
+#city-input::placeholder {
+  opacity: 0.6;
+  color: #EAF4FD;
+}
+
+.search-submit-btn {
+  display: none;
+}
+
+/* Favorite-Button  */
+.favorite-chips {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  color: #EAF4FD;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background-color: #243B52;
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  background-color: #324F6C;
+}
+
+.chip.active {
+  background-color: #2487D6;
+}
+
+/* Main */
+
+
+
+
+
+@media (min-width: 1024px) {
+
+  /* header */
+  header {
+    padding: 36px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    margin-bottom: 0;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    padding: 14px;
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .logo span {
+    font-size: 1.5rem;
+  }
+
+  .chip {
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    padding: 10px 20px;
+  }
+
+  /* header */
+}

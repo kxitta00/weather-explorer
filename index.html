@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherApp</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="weather-header">
+    <!-- Logo -->
+    <div class="logo">
+      <img src="logo.svg" alt="Logo" width="28" height="28">
+      <span class="logo-title">Weather Explorer</span>
+    </div>
+    <!-- Search-Box -->
+    <form id="search-form" class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="city-input" placeholder="ค้นหาเมือง เช่น นครราชสีมา, Tokyo">
+      <button type="submit" class="search-submit-btn">ค้นหา</button>
+    </form>
+    <!-- Favorite-Button -->
+    <div id="favorite-chips" class="favorite-chips">
+      <button type="button" class="chip active">กรุงเทพมหานคร</button>
+      <button type="button" class="chip">นครราชสีมา</button>
+      <button type="button" class="chip">เชียงใหม่</button>
+    </div>
+  </header>
+  <!-- Header -->
+
+  <!-- Main -->
+  <main>
+    <!-- hero -->
+    <section class="hero-card">
+      <!--left -->
+      <div class="weather-main">
+        <h1 class="main-title">กรุงเทพมหานคร</h1>
+        <p class="date">วันเสาร์ที่ 17 ตุลาคม</p>
+        <div class="now">
+          <span class="temp">31</span>
+          <sup>°C</sup>
+          <i class="fa-solid fa-cloud-sun weather-hero-icon"></i>
+        </div>
+      </div>
+      <!-- right -->
+      <div class="metrics-grid">
+
+      </div>
+    </section>
+    <section class="">
+
+    </section>
+    <section class="">
+
+    </section>
+  </main>
+  <footer>
+
+  </footer>
+  <script type="module" src="src/main.ts"></script>
+</body>
+
+</html>
