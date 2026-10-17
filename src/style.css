@@ -309,6 +309,85 @@ main {
   font-weight: bold;
 }
 
+.forecast-title {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 12px;
+}
+
+.forecast-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--border-card);
+  background-color: var(--bg-card);
+}
+
+.forecast-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.forecast-day {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.forecast-header i {
+  font-size: 1.5rem;
+}
+
+.forecast-temps {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.temp-max {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.temp-min {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.footer-container {
+  border-top: 1px solid var(--border-card);
+  margin-top: 14px;
+  padding: 24px 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.footer-cradit,
+.footer-api {
+  font-size: 0.75rem;
+}
+
+.status-container {
+  display: none;
+}
+
 @media (min-width: 1024px) {
 
   /* header */
@@ -317,6 +396,7 @@ main {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
   }
 
   .logo {
@@ -327,13 +407,18 @@ main {
     display: flex;
     align-items: center;
     padding: 14px;
-    max-width: 600px;
+    max-width: 540px;
     width: 100%;
     margin-bottom: 0;
   }
 
   .logo span {
     font-size: 1.5rem;
+  }
+
+  .favorite-chips {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
   }
 
   .chip {
@@ -412,4 +497,34 @@ main {
   .stats-card {
     flex: 1;
   }
+
+  .forecast-grid {
+    grid-template-columns: repeat(7, 1fr);
+
+  }
+
+  .forecast-card {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
+  }
+
+  .forecast-header {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .forecast-header i {
+    font-size: 2rem;
+  }
+
+  .footer-container {
+    justify-content: space-between;
+    flex-direction: row;
+  }
+
 }

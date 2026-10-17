@@ -38,6 +38,7 @@
 
   <!-- Main -->
   <main>
+    <div class="status-container" id="status-container"></div>
     <!-- hero -->
     <section class="hero-card" id="hero-weather">
       <!--left -->
@@ -109,18 +110,82 @@
     <h2 class="forecast-title">พยากรณ์ 7 วัน</h2>
     <section class="forecast-grid" id="forecast-grid">
       <div class="forecast-card active">
-        <span class="forecast-day">วันนี้</span>
-        <i class="fa-solid fa-cloud-sun"></i>
+        <div class="forecast-headear">
+          <span class="forecast-day">วันนี้</span>
+          <i class="fa-solid fa-cloud-sun"></i>
+        </div>
         <div class="forecast-temps">
           <span class="temp-max">34°</span>
           <span class="temp-min">26°</span>
         </div>
       </div>
-      <!-- todo มาทำการ์ด forecast ต่อ -->
+      <div class="forecast-card">
+        <div class="forecast-header">
+          <span class="forecast-day">จ.</span>
+          <i class="fa-solid fa-cloud-sun"></i>
+        </div>
+        <div class="forecast-temps">
+          <span class="temp-max">33°</span>
+          <span class="temp-min">26°</span>
+        </div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-header">
+          <span class="forecast-day">อ.</span>
+          <i class="fa-solid fa-cloud-rain"></i>
+        </div>
+        <div class="forecast-temps">
+          <span class="temp-max">32°</span>
+          <span class="temp-min">25°</span>
+        </div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-header">
+          <span class="forecast-day">พ.</span>
+          <i class="fa-solid fa-cloud-showers-heavy"></i>
+        </div>
+        <div class="forecast-temps">
+          <span class="temp-max">31°</span>
+          <span class="temp-min">25°</span>
+        </div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-header">
+          <span class="forecast-day">พฤ.</span>
+          <i class="fa-solid fa-sun"></i>
+        </div>
+        <div class="forecast-temps">
+          <span class="temp-max">34°</span>
+          <span class="temp-min">26°</span>
+        </div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-header">
+          <span class="forecast-day">ศ.</span>
+          <i class="fa-solid fa-cloud-sun"></i>
+        </div>
+        <div class="forecast-temps">
+          <span class="temp-max">35°</span>
+          <span class="temp-min">27°</span>
+        </div>
+      </div>
+      <div class="forecast-card">
+        <div class="forecast-header">
+          <span class="forecast-day">ส.</span>
+          <i class="fa-solid fa-cloud-rain"></i>
+        </div>
+        <div class="forecast-temps">
+          <span class="temp-max">32°</span>
+          <span class="temp-min">26°</span>
+        </div>
+      </div>
     </section>
   </main>
   <footer>
-
+    <div class="footer-container">
+      <span class="footer-cradit">© 2026 Weather Explorer | พัฒนาโดย Kxitta</span>
+      <span class="footer-api">ข้อมูลสภาพอากาศให้บริการโดย Open-Meteo API</span>
+    </div>
   </footer>
   <script type="module" src="src/main.ts"></script>
 </body>
