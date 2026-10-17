@@ -12,7 +12,8 @@ body {
 }
 
 input,
-button {
+button,
+#search-btn {
   font-family: inherit;
 }
 
@@ -42,9 +43,6 @@ footer {
   letter-spacing: 0.5px;
 }
 
-.fa-magnifying-glass {
-  font-size: 0.8rem;
-}
 
 /* search-box */
 .search-box {
@@ -61,7 +59,7 @@ footer {
   border: 1px solid #24394C;
 }
 
-#city-input {
+#search-input {
   flex: 1;
   outline: none;
   background-color: transparent;
@@ -69,13 +67,18 @@ footer {
   color: #EAF4FD;
 }
 
-#city-input::placeholder {
+#search-input::placeholder {
   opacity: 0.6;
   color: #EAF4FD;
 }
 
-.search-submit-btn {
-  display: none;
+#search-btn {
+  background-color: transparent;
+  color: #EAF4FD;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+
 }
 
 /* Favorite-Button  */

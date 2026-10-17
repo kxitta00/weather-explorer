@@ -11,6 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
 </head>
 
 <body>
@@ -23,9 +24,8 @@
     </div>
     <!-- Search-Box -->
     <form id="search-form" class="search-box">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="city-input" placeholder="ค้นหาเมือง เช่น นครราชสีมา, Tokyo">
-      <button type="submit" class="search-submit-btn">ค้นหา</button>
+      <button type="submit" id="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <input type="text" id="search-input" placeholder="ค้นหาเมือง เช่น นครราชสีมา, Tokyo">
     </form>
     <!-- Favorite-Button -->
     <div id="favorite-chips" class="favorite-chips">
@@ -39,7 +39,7 @@
   <!-- Main -->
   <main>
     <!-- hero -->
-    <section class="hero-card">
+    <section class="hero-card" id="hero-weather">
       <!--left -->
       <div class="weather-main">
         <h1 class="main-title">กรุงเทพมหานคร</h1>
