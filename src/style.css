@@ -264,7 +264,7 @@ main {
   display: flex;
   flex-direction: row;
   gap: 12px;
-  padding: 16px 22px;
+  padding: 18px 22px;
   background-color: var(--bg-subtle);
   border-radius: 9999px;
   border: 1px solid var(--border-card);
@@ -391,6 +391,8 @@ main {
   }
 
   .weather-hero-icon {
+    color: #F59E0B;
+    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.5));
     font-size: 5rem;
     margin-left: 60px;
   }
