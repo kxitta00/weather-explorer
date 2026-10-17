@@ -41,18 +41,45 @@
     <!-- hero -->
     <section class="hero-card" id="hero-weather">
       <!--left -->
-      <div class="weather-main">
-        <h1 class="main-title">กรุงเทพมหานคร</h1>
-        <p class="date">วันเสาร์ที่ 17 ตุลาคม</p>
+      <div class="city-main">
+        <div class="city-header">
+          <div class="city-name_btn-fav">
+            <h1 class="city-name" id="city-name">กรุงเทพมหานคร</h1>
+            <button class="city-fav-btn" id="fav-toggle-btn"><i class="fa-solid fa-location-dot"></i>
+              <span>เพิ่มในรายการโปรด</span>
+            </button>
+          </div>
+          <p class="date" id="current-date">วันเสาร์ที่ 17 ตุลาคม</p>
+        </div>
+
         <div class="now">
-          <span class="temp">31</span>
-          <sup>°C</sup>
+          <span class="temp" id="current-temp">31</span><sup>°C</sup>
           <i class="fa-solid fa-cloud-sun weather-hero-icon"></i>
         </div>
+        <p class="weather-desc" id="weather-condition">มีเมฆบางส่วน</p>
       </div>
       <!-- right -->
       <div class="metrics-grid">
-
+        <div class="metric-card">
+          <span class="metric-label">ความชื้น</span>
+          <span class="metric-value" id="humidity-val">68%</span>
+          <span class="metric-desc" id="humidity-desc">ค่อนข้างชื้น</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">ความเร็วลม</span>
+          <span class="metric-value" id="wind-val">12 km/h</span>
+          <span class="metric-desc" id="wind-desc">ลมเบา</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">รู้สึกเหมือน</span>
+          <span class="metric-value" id="feels-like-val">35°</span>
+          <span class="metric-desc" id="feels-like-desc">ร้อนอบอ้าว</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">ดัชนี UV</span>
+          <span class="metric-value" id="uv-val">8</span>
+          <span class="metric-desc" id="uv-desc">สูงมาก</span>
+        </div>
       </div>
     </section>
     <section class="">
