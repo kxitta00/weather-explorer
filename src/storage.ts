@@ -1,5 +1,5 @@
 const STORAGE_KEY: string = "weather_favorites"
-const DEFAULT_CITIES: string[] = ["Bangkok", "Korat"]
+const DEFAULT_CITIES: string[] = ["Bangkok", "Nakhon Ratchasima"]
 
 /**
  * โหลดเมือง Favorites จากข้อมูลเดิมหรือกรณียังไม่มีข้อมูล ก็จะดึง DEFAULT_CITIES ไปใช้พร้อมป้องกันด้วย try catch
