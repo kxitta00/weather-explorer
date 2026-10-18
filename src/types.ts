@@ -11,6 +11,7 @@ export type Weather = {
   cityName: string;
   temperature: number;
   description: string;
+  icon: string;
   humidity: number; //ความชื้น
   windSpeed: number; //ความเร็วลม
   feelsLike: number; //อุณหภูมิที่รู้สึกเหมือน

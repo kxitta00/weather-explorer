@@ -5,7 +5,10 @@ import { calculateWeeklyStats, formatDayName, getWeatherInfo } from "./utils";
 import { getFavorites, saveFavorite } from "./storage";
 import { type Weather, type AsyncState, type ForecastResponse } from "./types";
 
-
+// ==========================================
+// โซนที่ 1: การจับ DOM Elements & ตัวแปร State กลาง
+// ==========================================
+const heroIconEl = document.querySelector('.weather-hero-icon') as HTMLElement;
 const statusEl = document.getElementById('status-container') as HTMLElement;
 
 const heroWeatherEl = document.getElementById('hero-weather') as HTMLElement;
@@ -20,6 +23,12 @@ const favoriteChipsEl = document.getElementById('favorite-chips') as HTMLElement
 const favToggleBtn = document.getElementById('fav-toggle-btn') as HTMLButtonElement;
 
 let state: AsyncState<Weather> = { status: "idle" };
+
+// ==========================================
+// โซนที่ 2: ฟังก์ชันควบคุมหน้าจอ (UI & Render Engine)
+// ==========================================
+
+// 2.1 สลับหน้าจอ 4 สถานะ (idle, loading, error, success)
 function render(): void {
   switch (state.status) {
     case "idle":
@@ -36,7 +45,10 @@ function render(): void {
       forecastGridEl.style.display = "none";
       forecastTitleEl.style.display = "none";
       statusEl.style.display = "block";
-      statusEl.innerHTML = `<p class="status-msg" >Loading...</p>`
+      statusEl.innerHTML = `<div class="status-msg">
+      <i class="fa-solid fa-circle-notch fa-spin status-icon loading-icon"></i>
+      <p class="status-text">กำลังโหลดข้อมูลสภาพอากาศ...</p>
+    </div>`
       break;
     case "error":
       heroWeatherEl.style.display = "none";
@@ -57,6 +69,7 @@ function render(): void {
   }
 }
 
+// 2.2 หยอดข้อมูลสภาพอากาศสดลงหน้าจอ 3 โซน (Hero Card, สรุปสถิติ, การ์ด 7 วัน)
 function renderWeather(data: Weather): void {
   //hero
   const cityNameEl = document.getElementById('city-name') as HTMLElement;
@@ -105,10 +118,13 @@ function renderWeather(data: Weather): void {
     `;
   }).join("");
 
+  //hero icon
+  heroIconEl.className = `fa-solid ${data.icon} weather-hero-icon`;
   upadateFavButton(data.cityName)
   renderChips(data.cityName);
 }
 
+// 2.3 สลับสีและข้อความปุ่มเพิ่ม/ลบรายการโปรด
 function upadateFavButton(cityName: string): void {
   const isFav = getFavorites().includes(cityName);
 
@@ -121,6 +137,7 @@ function upadateFavButton(cityName: string): void {
   }
 }
 
+// 2.4 ปั๊มปุ่มชิปเมืองโปรดพร้อมไฮไลท์สีฟ้าตามเมืองที่กำลังเปิดดูอยู่
 function renderChips(activeCity?: string): void {
   const cityNames = getFavorites();
   favoriteChipsEl.innerHTML = cityNames.map(name => {
@@ -132,6 +149,10 @@ function renderChips(activeCity?: string): void {
 
 }
 
+// ==========================================
+// โซนที่ 3: ท่อส่งน้ำหลัก (Data Pipeline: loadWeather)
+// Flow: สั่ง Loading ➔ ยิง API ➔ ปั้นก้อน Weather ➔ อัปเดต State Success ➔ สั่ง Render
+// ==========================================
 async function loadWeather(cityName: string): Promise<void> {
   state = { status: "loading" };
   render();
@@ -143,6 +164,7 @@ async function loadWeather(cityName: string): Promise<void> {
       cityName: city.name,
       temperature: forecastData.current.temperature_2m,
       description: getWeatherInfo(forecastData.current.weather_code).description,
+      icon: getWeatherInfo(forecastData.current.weather_code).icon,
       humidity: forecastData.current.relative_humidity_2m,
       windSpeed: forecastData.current.wind_speed_10m,
       feelsLike: forecastData.current.apparent_temperature,
@@ -163,8 +185,11 @@ async function loadWeather(cityName: string): Promise<void> {
   }
 }
 
-//Dom event Listen
+// ==========================================
+// โซนที่ 4: Event Listeners (ดักฟังการกระทำของผู้ใช้)
+// ==========================================
 
+// 4.1 ค้นหาเมืองเมื่อผู้ใช้กด Submit ในฟอร์ม
 searchFormEl.addEventListener("submit", (e) => {
   e.preventDefault();
   const query = searchInputEl.value.trim();
@@ -172,31 +197,30 @@ searchFormEl.addEventListener("submit", (e) => {
     loadWeather(query);
     searchInputEl.value = "";
   }
-})
+});
 
+// 4.2 สลับเมืองเมื่อผู้ใช้คลิกที่ปุ่มชิป (Event Delegation)
 favoriteChipsEl.addEventListener("click", (e) => {
-
   const target = e.target as HTMLElement;
   if (target.classList.contains("chip")) {
     const cityName = target.textContent?.trim();
     if (cityName) {
-      loadWeather(cityName)
+      loadWeather(cityName);
     }
   }
+});
 
-
-})
-
+// 4.3 เพิ่ม/ลบเมืองโปรดเมื่อคลิกปุ่มบน Hero Card
 favToggleBtn.addEventListener("click", () => {
   if (state.status === "success") {
-    saveFavorite(state.data.cityName)
-    upadateFavButton(state.data.cityName)
-    renderChips();
+    saveFavorite(state.data.cityName);
+    upadateFavButton(state.data.cityName);
+    renderChips(state.data.cityName);
   }
-})
+});
 
-
-
-
+// ==========================================
+// โซนที่ 5: เริ่มต้นการทำงานของแอป (App Bootstrap)
+// ==========================================
 renderChips();
-loadWeather("Korat");
+loadWeather("Bangkok");
