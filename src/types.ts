@@ -34,3 +34,17 @@ export type GeocodingResponse = {
     country: string,
   }[]
 }
+
+
+//type Report getWeatherInfo
+export type WeatherInfo = {
+  description: string,
+  icon: string,
+}
+
+//type Report calculateWeeklyStats
+export type WeeklyStats = {
+  max: number;
+  min: number;
+  avg: number;
+}
