@@ -5,9 +5,8 @@ import { calculateWeeklyStats, formatDayName, getWeatherInfo } from "./utils";
 import { getFavorites, saveFavorite } from "./storage";
 import { type Weather, type AsyncState, type ForecastResponse } from "./types";
 
-// ==========================================
+
 // โซนที่ 1: การจับ DOM Elements & ตัวแปร State กลาง
-// ==========================================
 const heroIconEl = document.querySelector('.weather-hero-icon') as HTMLElement;
 const statusEl = document.getElementById('status-container') as HTMLElement;
 
@@ -24,10 +23,8 @@ const favToggleBtn = document.getElementById('fav-toggle-btn') as HTMLButtonElem
 
 let state: AsyncState<Weather> = { status: "idle" };
 
-// ==========================================
-// โซนที่ 2: ฟังก์ชันควบคุมหน้าจอ (UI & Render Engine)
-// ==========================================
 
+// โซนที่ 2: ฟังก์ชันควบคุมหน้าจอ (UI & Render Engine)
 // 2.1 สลับหน้าจอ 4 สถานะ (idle, loading, error, success)
 function render(): void {
   switch (state.status) {
@@ -149,10 +146,9 @@ function renderChips(activeCity?: string): void {
 
 }
 
-// ==========================================
-// โซนที่ 3: ท่อส่งน้ำหลัก (Data Pipeline: loadWeather)
+
+// โซนที่ 3: (Data Pipeline: loadWeather)
 // Flow: สั่ง Loading ➔ ยิง API ➔ ปั้นก้อน Weather ➔ อัปเดต State Success ➔ สั่ง Render
-// ==========================================
 async function loadWeather(cityName: string): Promise<void> {
   state = { status: "loading" };
   render();
@@ -185,10 +181,8 @@ async function loadWeather(cityName: string): Promise<void> {
   }
 }
 
-// ==========================================
-// โซนที่ 4: Event Listeners (ดักฟังการกระทำของผู้ใช้)
-// ==========================================
 
+// โซนที่ 4: Event Listeners (ดักฟังการกระทำของผู้ใช้)
 // 4.1 ค้นหาเมืองเมื่อผู้ใช้กด Submit ในฟอร์ม
 searchFormEl.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -219,8 +213,8 @@ favToggleBtn.addEventListener("click", () => {
   }
 });
 
-// ==========================================
+
 // โซนที่ 5: เริ่มต้นการทำงานของแอป (App Bootstrap)
-// ==========================================
 renderChips();
 loadWeather("Bangkok");
+
