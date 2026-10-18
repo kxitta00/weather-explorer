@@ -32,7 +32,7 @@ export async function searchCity(cityName: string) {
 /**นำ latitude และ longitude ยิงไปหา สภาพอากาศ
  * */
 export async function getForecast(latitude: number, longitude: number) {
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`)
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=is_day,temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`)
   if (!res.ok) {
     throw new Error(`โหลดไม่สำเร็จ สถานะ: ${res.status}`)
   }

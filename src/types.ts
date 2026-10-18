@@ -53,6 +53,7 @@ export type WeeklyStats = {
 //type สำหรับ ForecastResponse
 export type ForecastResponse = {
   current: {
+    is_day: number;
     temperature_2m: number;
     relative_humidity_2m: number;
     apparent_temperature: number;

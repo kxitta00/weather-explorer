@@ -3,9 +3,15 @@ import { type WeatherInfo, type WeeklyStats } from "./types";
 /**
  * นำ code มาแปลงเป็นคำบรรยายสภาพอากาศและไอคอน FontAwesome สำหรับแสดงบน UI
  */
-export function getWeatherInfo(code: number): WeatherInfo {
+export function getWeatherInfo(code: number, is_day: number = 1): WeatherInfo {
   switch (code) {
     case 0:
+      if (is_day === 0) {
+        return {
+          description: "ท้องฟ้าแจ่มใส / คืนฟ้าโปร่ง",
+          icon: "fa-moon"
+        };
+      }
       return ({
         description: "ท้องฟ้าแจ่มใส / แดดจ้า",
         icon: "fa-sun"
@@ -13,6 +19,12 @@ export function getWeatherInfo(code: number): WeatherInfo {
     case 1:
     case 2:
     case 3:
+      if (is_day === 0) {
+        return {
+          description: "มีเมฆบางส่วน (กลางคืน)",
+          icon: "fa-cloud-moon"
+        };
+      }
       return ({
         description: "มีเมฆบางส่วน / เมฆเป็นส่วนมาก",
         icon: "fa-cloud-sun"

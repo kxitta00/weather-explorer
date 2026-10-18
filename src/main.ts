@@ -77,7 +77,6 @@ function renderWeather(data: Weather): void {
   const feelsEl = document.getElementById('feels-like-val') as HTMLElement;
   const uvEl = document.getElementById('uv-val') as HTMLElement;
   const dateEl = document.getElementById('current-date') as HTMLElement;
-
   cityNameEl.textContent = data.cityName;
   currTempEl.textContent = `${Math.round(data.temperature)}`;
   weatherDesEl.textContent = data.description;
@@ -159,8 +158,8 @@ async function loadWeather(cityName: string): Promise<void> {
     const weather: Weather = ({
       cityName: city.name,
       temperature: forecastData.current.temperature_2m,
-      description: getWeatherInfo(forecastData.current.weather_code).description,
-      icon: getWeatherInfo(forecastData.current.weather_code).icon,
+      description: getWeatherInfo(forecastData.current.weather_code, forecastData.current.is_day).description,
+      icon: getWeatherInfo(forecastData.current.weather_code, forecastData.current.is_day).icon,
       humidity: forecastData.current.relative_humidity_2m,
       windSpeed: forecastData.current.wind_speed_10m,
       feelsLike: forecastData.current.apparent_temperature,
