@@ -1,5 +1,8 @@
 import { type WeatherInfo, type WeeklyStats } from "./types";
 
+/**
+ * นำ code มาแปลงเป็นคำบรรยายสภาพอากาศและไอคอน FontAwesome สำหรับแสดงบน UI
+ */
 export function getWeatherInfo(code: number): WeatherInfo {
   switch (code) {
     case 0:
@@ -57,6 +60,9 @@ export function getWeatherInfo(code: number): WeatherInfo {
   }
 }
 
+/**
+ *หาค่าสูงสุดต่ำสุดและค่าเฉลี่ยจาก temp ที่ได้มาจาก api โดยใช้ reduce
+ */
 export function calculateWeeklyStats(maxTemps: number[], minTemps: number[]): WeeklyStats {
   const max = maxTemps.reduce((acc, curr) => {
     return curr > acc ? curr : acc;
@@ -76,6 +82,8 @@ export function calculateWeeklyStats(maxTemps: number[], minTemps: number[]): We
   })
 }
 
+/** แปลงวันที่รวมที่ได้จาก api มาเป็นวัน
+ */
 export function formatDayName(dateStr: string, index: number): string {
   if (index === 0) {
     return "วันนี้"

@@ -1,7 +1,202 @@
-import { searchCity, getForecast } from "./api";
-import { calculateWeeklyStats, formatDayName } from "./utils";
 import './style.css'
 
-const data = await getForecast(13.75, 100.5);
-console.log(calculateWeeklyStats(data.daily.temperature_2m_max, data.daily.temperature_2m_min))
-console.log(formatDayName(data.daily.time[1], 1));
+import { searchCity, getForecast } from "./api";
+import { calculateWeeklyStats, formatDayName, getWeatherInfo } from "./utils";
+import { getFavorites, saveFavorite } from "./storage";
+import { type Weather, type AsyncState, type ForecastResponse } from "./types";
+
+
+const statusEl = document.getElementById('status-container') as HTMLElement;
+
+const heroWeatherEl = document.getElementById('hero-weather') as HTMLElement;
+const statsSummaryEl = document.getElementById('stats-summary') as HTMLElement;
+const forecastGridEl = document.getElementById('forecast-grid') as HTMLElement;
+const forecastTitleEl = document.querySelector('.forecast-title') as HTMLElement;
+
+const searchFormEl = document.getElementById('search-form') as HTMLFormElement;
+const searchInputEl = document.getElementById('search-input') as HTMLInputElement;
+
+const favoriteChipsEl = document.getElementById('favorite-chips') as HTMLElement;
+const favToggleBtn = document.getElementById('fav-toggle-btn') as HTMLButtonElement;
+
+let state: AsyncState<Weather> = { status: "idle" };
+function render(): void {
+  switch (state.status) {
+    case "idle":
+      heroWeatherEl.style.display = "none";
+      statsSummaryEl.style.display = "none";
+      forecastGridEl.style.display = "none";
+      forecastTitleEl.style.display = "none";
+      statusEl.style.display = "block";
+      statusEl.innerHTML = `<p class="status-msg" > พิมพ์ชื่อเมืองในช่องค้นหาด้านบนเพื่อดูสภาพอากาศ </p>`
+      break;
+    case "loading":
+      heroWeatherEl.style.display = "none";
+      statsSummaryEl.style.display = "none";
+      forecastGridEl.style.display = "none";
+      forecastTitleEl.style.display = "none";
+      statusEl.style.display = "block";
+      statusEl.innerHTML = `<p class="status-msg" >Loading...</p>`
+      break;
+    case "error":
+      heroWeatherEl.style.display = "none";
+      statsSummaryEl.style.display = "none";
+      forecastGridEl.style.display = "none";
+      forecastTitleEl.style.display = "none";
+      statusEl.style.display = "block";
+      statusEl.innerHTML = `<p class="status-msg" >${state.message}</p>`
+      break;
+    case "success":
+      statusEl.style.display = "none";
+      heroWeatherEl.style.display = "";
+      statsSummaryEl.style.display = "";
+      forecastGridEl.style.display = "";
+      forecastTitleEl.style.display = "";
+      renderWeather(state.data)
+      break;
+  }
+}
+
+function renderWeather(data: Weather): void {
+  //hero
+  const cityNameEl = document.getElementById('city-name') as HTMLElement;
+  const currTempEl = document.getElementById('current-temp') as HTMLElement;
+  const weatherDesEl = document.getElementById('weather-condition') as HTMLElement;
+  const humidityEl = document.getElementById('humidity-val') as HTMLElement;
+  const windEl = document.getElementById('wind-val') as HTMLElement;
+  const feelsEl = document.getElementById('feels-like-val') as HTMLElement;
+  const uvEl = document.getElementById('uv-val') as HTMLElement;
+  const dateEl = document.getElementById('current-date') as HTMLElement;
+
+  cityNameEl.textContent = data.cityName;
+  currTempEl.textContent = `${Math.round(data.temperature)}`;
+  weatherDesEl.textContent = data.description;
+  humidityEl.textContent = `${data.humidity}%`;
+  windEl.textContent = `${data.windSpeed} km/h`;
+  feelsEl.textContent = `${Math.round(data.feelsLike)}°`
+  uvEl.textContent = `${data.uvIndex}`
+  dateEl.textContent = new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  //weekly stats
+  const maxTemps = data.forecast.map(item => item.max);
+  const minTemps = data.forecast.map(item => item.min);
+  const temps = calculateWeeklyStats(maxTemps, minTemps);
+
+  document.getElementById('weekly-max')!.textContent = `${temps.max}°C`;
+  document.getElementById('weekly-min')!.textContent = `${temps.min}°C`;
+  document.getElementById('weekly-avg')!.textContent = `${temps.avg}°C`;
+
+  //forecastGridEl
+  forecastGridEl.innerHTML = data.forecast.map((f, index) => {
+    const icon = getWeatherInfo(f.weatherCode).icon;
+    const activeClass = index === 0 ? "active" : "";
+
+    return `
+     <div class="forecast-card ${activeClass}">
+      <div class="forecast-header">
+        <span class="forecast-day">${f.day}</span>
+        <i class="fa-solid ${icon}"></i>
+      </div>
+      <div class="forecast-temps">
+        <span class="temp-max">${Math.round(f.max)}°</span>
+        <span class="temp-min">${Math.round(f.min)}°</span>
+      </div>
+    </div>
+    `;
+  }).join("");
+
+  upadateFavButton(data.cityName)
+  renderChips(data.cityName);
+}
+
+function upadateFavButton(cityName: string): void {
+  const isFav = getFavorites().includes(cityName);
+
+  if (isFav) {
+    favToggleBtn.classList.add("active");
+    favToggleBtn.innerHTML = `<i class="fa-solid fa-check"></i> <span>บันทึกแล้ว</span>`;
+  } else {
+    favToggleBtn.classList.remove("active");
+    favToggleBtn.innerHTML = `<i class="fa-solid fa-location-dot"></i> <span>เพิ่มในรายการโปรด</span>`;
+  }
+}
+
+function renderChips(activeCity?: string): void {
+  const cityNames = getFavorites();
+  favoriteChipsEl.innerHTML = cityNames.map(name => {
+    const isActive = activeCity && name.toLocaleLowerCase() === activeCity.toLocaleLowerCase()
+    return `
+    <button type="button" class="chip ${isActive ? 'active' : ''}">${name}</button>
+    `;
+  }).join("");
+
+}
+
+async function loadWeather(cityName: string): Promise<void> {
+  state = { status: "loading" };
+  render();
+
+  try {
+    const city = await searchCity(cityName);
+    const forecastData: ForecastResponse = await getForecast(city.latitude, city.longitude);
+    const weather: Weather = ({
+      cityName: city.name,
+      temperature: forecastData.current.temperature_2m,
+      description: getWeatherInfo(forecastData.current.weather_code).description,
+      humidity: forecastData.current.relative_humidity_2m,
+      windSpeed: forecastData.current.wind_speed_10m,
+      feelsLike: forecastData.current.apparent_temperature,
+      uvIndex: forecastData.daily.uv_index_max[0],
+      forecast: forecastData.daily.time.map((timeStr, index) => ({
+        day: formatDayName(timeStr, index),
+        weatherCode: forecastData.daily.weather_code[index],
+        max: forecastData.daily.temperature_2m_max[index],
+        min: forecastData.daily.temperature_2m_min[index],
+      }))
+    })
+    state = { status: "success", data: weather };
+    render();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+    state = { status: "error", message };
+    render()
+  }
+}
+
+//Dom event Listen
+
+searchFormEl.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const query = searchInputEl.value.trim();
+  if (query) {
+    loadWeather(query);
+    searchInputEl.value = "";
+  }
+})
+
+favoriteChipsEl.addEventListener("click", (e) => {
+
+  const target = e.target as HTMLElement;
+  if (target.classList.contains("chip")) {
+    const cityName = target.textContent?.trim();
+    if (cityName) {
+      loadWeather(cityName)
+    }
+  }
+
+
+})
+
+favToggleBtn.addEventListener("click", () => {
+  if (state.status === "success") {
+    saveFavorite(state.data.cityName)
+    upadateFavButton(state.data.cityName)
+    renderChips();
+  }
+})
+
+
+
+
+renderChips();
+loadWeather("Korat");
