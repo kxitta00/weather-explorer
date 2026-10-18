@@ -10,6 +10,7 @@
 weather-explorer/
 ├── src/
 │   ├── api.ts          # โมดูลเชื่อมต่อ Open-Meteo Geocoding & Forecast APIs
+│   ├── provinces.ts    # ตารางเทียบชื่อ 77 จังหวัดภาษาไทยเป็นภาษาอังกฤษสำหรับค้นหา
 │   ├── utils.ts        # Pure functions แปลงรหัส WMO และคำนวณสถิติประจำสัปดาห์
 │   ├── storage.ts      # โมดูลจัดการบันทึกเมืองโปรดลง Browser LocalStorage
 │   ├── types.ts        # กำหนด Type และ Interface ทั้งหมดในระบบ

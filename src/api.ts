@@ -1,11 +1,11 @@
 import { type GeocodingResponse } from "./types";
-
+import { toEnglishCity } from "./provinces";
 
 /**นำชื่อเมืองที่ user ค้นหายิงไปหา latitude และ longitude เพื่อนำไปหาสภาพอากาศต่อ
  * */
 export async function searchCity(cityName: string) {
   //คลีนข้อมูล
-  const cleanName: string = cityName.trim();
+  const cleanName: string = toEnglishCity(cityName);
   if (cleanName === "") {
     throw new Error("กรุณากรอกชื่อเมือง");
   }
