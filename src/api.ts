@@ -1,17 +1,14 @@
 import { type GeocodingResponse } from "./types";
-import { toEnglishCity } from "./provinces";
+
 
 /**นำชื่อเมืองที่ user ค้นหายิงไปหา latitude และ longitude เพื่อนำไปหาสภาพอากาศต่อ
  * */
 export async function searchCity(cityName: string) {
-  //คลีนข้อมูล
-  const cleanName: string = toEnglishCity(cityName);
-  if (cleanName === "") {
+  if (!cityName.trim()) {
     throw new Error("กรุณากรอกชื่อเมือง");
   }
-
   //ยิง api
-  const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanName)}&count=1&language=en&format=json`);
+  const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName.trim())}&count=1&language=en&format=json`);
   if (!res.ok) {
     throw new Error(`โหลดไม่สำเร็จ สถานะ: ${res.status}`);
   }

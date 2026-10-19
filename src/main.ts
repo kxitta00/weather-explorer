@@ -9,6 +9,8 @@ import { type Weather, type AsyncState, type ForecastResponse } from "./types";
 import { renderWeather } from "./weatherView";
 //ฟังก์ชันในส่วน Fav
 import { renderChips, upadateFavButton } from "./favoritesView";
+//ฟังก์ชันหาชื่อเมืองภาษาอังกฤษ
+import { toEnglishCity } from './provinces';
 
 // โซนที่ 1: การจับ DOM Elements & ตัวแปร State กลาง
 const statusEl = document.getElementById('status-container') as HTMLElement;
@@ -80,7 +82,7 @@ function render(): void {
 /**
  * ท่อดึงข้อมูลสภาพอากาศ (Data Pipeline)
  * 1. สับสวิตช์ state = loading สั่ง render() ขึ้นตัวหมุน
- * 2. เข้าบล็อก try: ส่งชื่อเมืองให้ searchCity หาพิกัด -> ส่งพิกัดให้ getForecast ขอข้อมูลดิบ
+ * 2. เข้าบล็อก try: ส่งชื่อเมืองไปแปลง toEnglishCity  ส่งต่อ searchCity หาพิกัด -> ส่งพิกัดให้ getForecast ขอข้อมูลดิบ
  * 3. ปั้นข้อมูลดิบให้อยู่ในโครงสร้าง type Weather ที่คลีนเรียบร้อย
  * 4. สับสวิตช์ state = success แนบ data แล้วสั่ง render() วาดข้อมูลขึ้นจอ
  * 5. กรณีพัง (catch): ดึงข้อความ error สับสวิตช์ state = error สั่ง render() แจ้งเตือนผู้ใช้
@@ -90,7 +92,8 @@ async function loadWeather(cityName: string): Promise<void> {
   render();
 
   try {
-    const city = await searchCity(cityName);
+    const englishName = toEnglishCity(cityName);
+    const city = await searchCity(englishName);
     const forecastData: ForecastResponse = await getForecast(city.latitude, city.longitude);
     const weather: Weather = ({
       cityName: city.name,
