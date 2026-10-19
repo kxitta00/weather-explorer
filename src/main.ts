@@ -1,13 +1,16 @@
 import './style.css'
 
 import { searchCity, getForecast } from "./api";
-import { calculateWeeklyStats, formatDayName, getWeatherInfo } from "./utils";
-import { getFavorites, saveFavorite } from "./storage";
+import { formatDayName, getWeatherInfo } from "./utils";
+import { saveFavorite } from "./storage";
 import { type Weather, type AsyncState, type ForecastResponse } from "./types";
 
+//ฟังก์ชัน renderWeather
+import { renderWeather } from "./weatherView";
+//ฟังก์ชันในส่วน Fav
+import { renderChips, upadateFavButton } from "./favoritesView";
 
 // โซนที่ 1: การจับ DOM Elements & ตัวแปร State กลาง
-const heroIconEl = document.querySelector('.weather-hero-icon') as HTMLElement;
 const statusEl = document.getElementById('status-container') as HTMLElement;
 
 const heroWeatherEl = document.getElementById('hero-weather') as HTMLElement;
@@ -24,8 +27,13 @@ const favToggleBtn = document.getElementById('fav-toggle-btn') as HTMLButtonElem
 let state: AsyncState<Weather> = { status: "idle" };
 
 
-// โซนที่ 2: ฟังก์ชันควบคุมหน้าจอ (UI & Render Engine)
-// 2.1 สลับหน้าจอ 4 สถานะ (idle, loading, error, success)
+/**
+ * ฟังก์ชันคุมหน้าจอตาม state กลาง (idle, loading, error, success)
+ * - idle: ซ่อนการ์ด โชว์ข้อความให้ผู้ใช้ค้นหา
+ * - loading: ซ่อนการ์ด โชว์ตัวหมุนเพื่อรอข้อมูล
+ * - error: ซ่อนการ์ด โชว์ข้อความแจ้งเตือนสีแดง
+ * - success: ปิด loading เปิดการ์ด แล้วสั่ง weatherView และ favoritesView วาดจอ
+ */
 function render(): void {
   switch (state.status) {
     case "idle":
@@ -62,92 +70,21 @@ function render(): void {
       forecastGridEl.style.display = "";
       forecastTitleEl.style.display = "";
       renderWeather(state.data)
+      upadateFavButton(state.data.cityName)
+      renderChips(state.data.cityName)
       break;
   }
 }
 
-// 2.2 หยอดข้อมูลสภาพอากาศสดลงหน้าจอ 3 โซน (Hero Card, สรุปสถิติ, การ์ด 7 วัน)
-function renderWeather(data: Weather): void {
-  //hero
-  const cityNameEl = document.getElementById('city-name') as HTMLElement;
-  const currTempEl = document.getElementById('current-temp') as HTMLElement;
-  const weatherDesEl = document.getElementById('weather-condition') as HTMLElement;
-  const humidityEl = document.getElementById('humidity-val') as HTMLElement;
-  const windEl = document.getElementById('wind-val') as HTMLElement;
-  const feelsEl = document.getElementById('feels-like-val') as HTMLElement;
-  const uvEl = document.getElementById('uv-val') as HTMLElement;
-  const dateEl = document.getElementById('current-date') as HTMLElement;
-  cityNameEl.textContent = data.cityName;
-  currTempEl.textContent = `${Math.round(data.temperature)}`;
-  weatherDesEl.textContent = data.description;
-  humidityEl.textContent = `${data.humidity}%`;
-  windEl.textContent = `${data.windSpeed} km/h`;
-  feelsEl.textContent = `${Math.round(data.feelsLike)}°`
-  uvEl.textContent = `${data.uvIndex}`
-  dateEl.textContent = new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  //weekly stats
-  const maxTemps = data.forecast.map(item => item.max);
-  const minTemps = data.forecast.map(item => item.min);
-  const temps = calculateWeeklyStats(maxTemps, minTemps);
-
-  document.getElementById('weekly-max')!.textContent = `${temps.max}°C`;
-  document.getElementById('weekly-min')!.textContent = `${temps.min}°C`;
-  document.getElementById('weekly-avg')!.textContent = `${temps.avg}°C`;
-
-  //forecastGridEl
-  forecastGridEl.innerHTML = data.forecast.map((f, index) => {
-    const icon = getWeatherInfo(f.weatherCode).icon;
-    const activeClass = index === 0 ? "active" : "";
-
-    return `
-     <div class="forecast-card ${activeClass}">
-      <div class="forecast-header">
-        <span class="forecast-day">${f.day}</span>
-        <i class="fa-solid ${icon}"></i>
-      </div>
-      <div class="forecast-temps">
-        <span class="temp-max">${Math.round(f.max)}°</span>
-        <span class="temp-min">${Math.round(f.min)}°</span>
-      </div>
-    </div>
-    `;
-  }).join("");
-
-  //hero icon
-  heroIconEl.className = `fa-solid ${data.icon} weather-hero-icon`;
-  upadateFavButton(data.cityName)
-  renderChips(data.cityName);
-}
-
-// 2.3 สลับสีและข้อความปุ่มเพิ่ม/ลบรายการโปรด
-function upadateFavButton(cityName: string): void {
-  const isFav = getFavorites().includes(cityName);
-
-  if (isFav) {
-    favToggleBtn.classList.add("active");
-    favToggleBtn.innerHTML = `<i class="fa-solid fa-check"></i> <span>บันทึกแล้ว</span>`;
-  } else {
-    favToggleBtn.classList.remove("active");
-    favToggleBtn.innerHTML = `<i class="fa-solid fa-location-dot"></i> <span>เพิ่มในรายการโปรด</span>`;
-  }
-}
-
-// 2.4 ปั๊มปุ่มชิปเมืองโปรดพร้อมไฮไลท์สีฟ้าตามเมืองที่กำลังเปิดดูอยู่
-function renderChips(activeCity?: string): void {
-  const cityNames = getFavorites();
-  favoriteChipsEl.innerHTML = cityNames.map(name => {
-    const isActive = activeCity && name.toLocaleLowerCase() === activeCity.toLocaleLowerCase()
-    return `
-    <button type="button" class="chip ${isActive ? 'active' : ''}">${name}</button>
-    `;
-  }).join("");
-
-}
-
-
-// โซนที่ 3: (Data Pipeline: loadWeather)
-// Flow: สั่ง Loading ➔ ยิง API ➔ ปั้นก้อน Weather ➔ อัปเดต State Success ➔ สั่ง Render
+/**
+ * ท่อดึงข้อมูลสภาพอากาศ (Data Pipeline)
+ * 1. สับสวิตช์ state = loading สั่ง render() ขึ้นตัวหมุน
+ * 2. เข้าบล็อก try: ส่งชื่อเมืองให้ searchCity หาพิกัด -> ส่งพิกัดให้ getForecast ขอข้อมูลดิบ
+ * 3. ปั้นข้อมูลดิบให้อยู่ในโครงสร้าง type Weather ที่คลีนเรียบร้อย
+ * 4. สับสวิตช์ state = success แนบ data แล้วสั่ง render() วาดข้อมูลขึ้นจอ
+ * 5. กรณีพัง (catch): ดึงข้อความ error สับสวิตช์ state = error สั่ง render() แจ้งเตือนผู้ใช้
+ */
 async function loadWeather(cityName: string): Promise<void> {
   state = { status: "loading" };
   render();
@@ -182,7 +119,7 @@ async function loadWeather(cityName: string): Promise<void> {
 
 
 // โซนที่ 4: Event Listeners (ดักฟังการกระทำของผู้ใช้)
-// 4.1 ค้นหาเมืองเมื่อผู้ใช้กด Submit ในฟอร์ม
+// ดักการ Submit ฟอร์ม: ดูดข้อความชื่อเมือง ส่งต่อให้ loadWeather และล้างช่องค้นหา
 searchFormEl.addEventListener("submit", (e) => {
   e.preventDefault();
   const query = searchInputEl.value.trim();
@@ -192,7 +129,7 @@ searchFormEl.addEventListener("submit", (e) => {
   }
 });
 
-// 4.2 สลับเมืองเมื่อผู้ใช้คลิกที่ปุ่มชิป (Event Delegation)
+// สลับดูสภาพอากาศเมื่อผู้ใช้คลิกที่ปุ่มชิปเมืองโปรด (Event Delegation)
 favoriteChipsEl.addEventListener("click", (e) => {
   const target = e.target as HTMLElement;
   if (target.classList.contains("chip")) {
@@ -203,7 +140,7 @@ favoriteChipsEl.addEventListener("click", (e) => {
   }
 });
 
-// 4.3 เพิ่ม/ลบเมืองโปรดเมื่อคลิกปุ่มบน Hero Card
+// สลับสถานะเพิ่ม/ลบเมืองโปรดลง LocalStorage พร้อมอัปเดตปุ่มและชิปทันที
 favToggleBtn.addEventListener("click", () => {
   if (state.status === "success") {
     saveFavorite(state.data.cityName);
@@ -214,6 +151,7 @@ favToggleBtn.addEventListener("click", () => {
 
 
 // โซนที่ 5: เริ่มต้นการทำงานของแอป (App Bootstrap)
+// สั่งโหลดหน้าเว็บครั้งแรกด้วยสภาพอากาศของกรุงเทพฯ และปั๊มปุ่มชิปเมืองโปรด
 renderChips();
 loadWeather("Bangkok");
 
