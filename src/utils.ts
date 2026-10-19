@@ -8,7 +8,7 @@ export function getWeatherInfo(code: number, is_day: number = 1): WeatherInfo {
     case 0:
       if (is_day === 0) {
         return {
-          description: "ท้องฟ้าแจ่มใส / คืนฟ้าโปร่ง",
+          description: "ท้องฟ้าแจ่มใส / ฟ้าโปร่ง (กลางคืน)",
           icon: "fa-moon"
         };
       }
@@ -31,6 +31,12 @@ export function getWeatherInfo(code: number, is_day: number = 1): WeatherInfo {
       })
     case 45:
     case 48:
+      if (is_day === 0) {
+        return {
+          description: "มีหมอก / หมอกหนา (กลางคืน)",
+          icon: "fa-smog"
+        };
+      }
       return ({
         description: "มีหมอก / หมอกหนา",
         icon: "fa-smog"
@@ -53,6 +59,12 @@ export function getWeatherInfo(code: number, is_day: number = 1): WeatherInfo {
     case 80:
     case 81:
     case 82:
+      if (is_day === 0) {
+        return {
+          description: "ฝนตก / ฝนฟ้าคะนอง (กลางคืน)",
+          icon: "fa-cloud-moon-rain"
+        };
+      }
       return ({
         description: "ฝนตก / ฝนฟ้าคะนอง",
         icon: "fa-cloud-rain"
@@ -60,6 +72,12 @@ export function getWeatherInfo(code: number, is_day: number = 1): WeatherInfo {
     case 95:
     case 96:
     case 99:
+      if (is_day === 0) {
+        return {
+          description: "พายุฝนฟ้าคะนอง (กลางคืน)",
+          icon: "fa-cloud-bolt"
+        };
+      }
       return ({
         description: "พายุฝนฟ้าคะนอง",
         icon: "fa-cloud-bolt"
@@ -105,4 +123,54 @@ export function formatDayName(dateStr: string, index: number): string {
   const Days: string[] = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
   return Days[date.getDay()];
 
+}
+
+/** แปลงความชื้นที่ได้จาก api มาเป็นสถานะ*/
+export function getHumidityDesc(humidity: number): string {
+  if (humidity > 70) {
+    return "ค่อนข้างชื้น";
+  } else if (humidity >= 40) {
+    return "กำลังสบาย";
+  } else {
+    return "อากาศแห้ง";
+  }
+}
+
+/** แปลงแรงลมที่ได้จาก api มาเป็นสถานะ*/
+export function getWindDesc(speed: number): string {
+  if (speed > 25) {
+    return "ลมแรง";
+  } else if (speed >= 10) {
+    return "ลมเบา-ปานกลาง";
+  } else {
+    return "ลมสงบ";
+  }
+}
+
+/** แปลงความรู้สึกจากสภาพอากาศที่ได้จาก api มาเป็นสถานะ*/
+export function getFeelsLikeDesc(temp: number): string {
+  if (temp > 38) {
+    return "ร้อนจัด / อันตราย";
+  } else if (temp >= 33) {
+    return "ร้อนอบอ้าว";
+  } else if (temp >= 20) {
+    return "สบายตัว";
+  } else {
+    return "อากาศเย็น";
+  }
+}
+
+/** แปลงUvที่ได้จาก api มาเป็นสถานะ*/
+export function getUvDesc(uv: number): string {
+  if (uv > 10) {
+    return "อันตรายสุดขีด";
+  } else if (uv >= 8) {
+    return "สูงมาก";
+  } else if (uv >= 6) {
+    return "สูง";
+  } else if (uv >= 3) {
+    return "ปานกลาง";
+  } else {
+    return "ต่ำ (ปลอดภัย)";
+  }
 }

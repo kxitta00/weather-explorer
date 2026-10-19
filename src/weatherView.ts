@@ -1,6 +1,6 @@
 import { type Weather } from "./types";
 import { calculateWeeklyStats, getWeatherInfo } from "./utils";
-
+import { getHumidityDesc, getWindDesc, getFeelsLikeDesc, getUvDesc } from "./utils";
 const forecastGridEl = document.getElementById('forecast-grid') as HTMLElement;
 const heroIconEl = document.querySelector('.weather-hero-icon') as HTMLElement;
 
@@ -9,6 +9,13 @@ const heroIconEl = document.querySelector('.weather-hero-icon') as HTMLElement;
  * จัดการครบทั้ง 3 ส่วน: Hero Card, สรุปสถิติประจำสัปดาห์, และการ์ดพยากรณ์ 7 วัน
  */
 export function renderWeather(data: Weather): void {
+  //ดึง  El มาเก็บไว้รอใช้ สำหรับสถานะ 4 สถานะในการ์ด Hero
+  const humidityDescEl = document.getElementById('humidity-desc') as HTMLElement;
+  const windDescEl = document.getElementById('wind-desc') as HTMLElement;
+  const feelsLikeDescEl = document.getElementById('feels-like-desc') as HTMLElement;
+  const uvDescEl = document.getElementById('uv-desc') as HTMLElement;
+
+
   // 1. ส่วน Hero: ดึง Element ที่จำเป็นมาเก็บไว้ในตัวแปร และสั่งวาดข้อมูลสภาพอากาศปัจจุบันขึ้นจอ
   const cityNameEl = document.getElementById('city-name') as HTMLElement;
   const currTempEl = document.getElementById('current-temp') as HTMLElement;
@@ -27,6 +34,12 @@ export function renderWeather(data: Weather): void {
   feelsEl.textContent = `${Math.round(data.feelsLike)}°`
   uvEl.textContent = `${data.uvIndex}`
   dateEl.textContent = new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // สั่งวาด 4 สถานะในการ์ด hero
+  humidityDescEl.textContent = getHumidityDesc(data.humidity);
+  windDescEl.textContent = getWindDesc(data.windSpeed);
+  feelsLikeDescEl.textContent = getFeelsLikeDesc(data.feelsLike);
+  uvDescEl.textContent = getUvDesc(data.uvIndex);
 
   // 2. ส่วน Weekly Stats: ใช้ map ดึงอุณหภูมิ แล้วส่งให้ calculateWeeklyStats หาค่ามากสุด น้อยสุด และเฉลี่ย มาแปะลงจอ
   const maxTemps = data.forecast.map(item => item.max);
