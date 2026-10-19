@@ -19,11 +19,11 @@ weather-explorer/
 │   ├── main.ts           # [Orchestrator] คุม State, ดัก Event Listeners และสั่ง View
 │   └── style.css         # Responsive Styling ด้วย Flexbox & CSS Grid
 ├── index.html            # โครงสร้าง Semantic HTML
-├── ARCHITECTURE.md       # สถาปัตยกรรมระบบโดยละเอียด พร้อม Sequence Diagrams
+├── ARCHITECTURE.md       # สถาปัตยกรรมระบบและวงจรการทำงานโดยละเอียด
 └── README.md             # ภาพรวมโปรเจกต์และบันทึกการเรียนรู้
 ```
 
-อ่านรายละเอียดสถาปัตยกรรมเชิงลึก ลำดับการเดินทางของข้อมูล และผังไดอะแกรมได้ที่ [ARCHITECTURE.md](ARCHITECTURE.md)
+อ่านรายละเอียดสถาปัตยกรรมเชิงลึกและลำดับการเดินทางของข้อมูลได้ที่ [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---
 
