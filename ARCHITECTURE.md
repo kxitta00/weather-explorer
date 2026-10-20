@@ -180,4 +180,5 @@ Main->>FavoritesView: renderChips(cityName)
 WeatherView-->>User: Updated weather UI
 ```
 ### 5.2 Favorite Toggle Flow
+### 5.3 Error Handling Flow
 - ค่อยแวะมาฝึกแกะอีก
