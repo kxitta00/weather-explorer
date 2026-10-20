@@ -166,19 +166,59 @@ Province-->>Main: englishName
 Main->>API: searchCity(englishName)
 API->>Geo: fetch city
 Geo-->>API: Geocoding JSON
-API-->>Main: city coordinates
-Main->>API: getForecast (latitude, longitude)
-API->>Forecast: Fetch forecast
-Forecast-->>API: Forecast JSON
-API->>Main: Forecast JSON
-Main->>Main: ปั้นข้อมูลเป็น Weather
-Main->>Main: state = success
-Main->>Main: render()
-Main->>WeatherView: renderWeather(weather)
-Main->>FavoritesView: upadateFavButton(cityName)
-Main->>FavoritesView: renderChips(cityName)
-WeatherView-->>User: Updated weather UI
+
+alt พบเมือง
+  API-->>Main: city coordinates
+  Main->>API: getForecast(latitude, longitude)
+  API->>Forecast: Fetch forecast
+  Forecast-->>API: Forecast JSON
+
+  alt โหลด Forecast สำเร็จ
+    API-->>Main: Forecast JSON
+    Main->>Main: ปั้นข้อมูลเป็น Weather
+    Main->>Main: state = success
+    Main->>Main: render()
+    Main->>WeatherView: renderWeather(weather)
+    Main->>FavoritesView: updateFavButton(cityName)
+    Main->>FavoritesView: renderChips(cityName)
+    WeatherView-->>User: Updated weather UI
+  else Forecast API ผิดพลาด
+    API-->>Main: Error
+    Main->>Main: state = error
+    Main->>Main: render()
+    WeatherView-->>User: แสดงข้อความผิดพลาด
+  end
+
+else ไม่พบเมือง หรือ Geocoding API ผิดพลาด
+  API-->>Main: Error
+  Main->>Main: state = error
+  Main->>Main: render()
+  WeatherView-->>User: แสดงข้อความผิดพลาด
+end
 ```
 ### 5.2 Favorite Toggle Flow
-### 5.3 Error Handling Flow
-- ค่อยแวะมาฝึกแกะอีก
+```mermaid
+sequenceDiagram
+actor User
+participant Main as main.ts
+participant Storage as storage.ts
+participant LocalStorage as Browser Local Storage
+participant FavoritesView as favoritesView.ts
+
+User->>Main: กดปุ่มเพิ่ม/ลบเมืองโปรด
+Main->>Storage: saveFavorite(cityName)
+Storage->>LocalStorage: อ่านรายชื่อเมืองโปรดที่มีอยู่
+
+alt ชื่อเมืองยังไม่อยู่ในรายการโปรด
+  Storage->>Storage: เพิ่ม cityName
+  Storage->>LocalStorage: บันทึกรายการ
+else ชื่อเมืองอยู่ในรายการเมืองโปรดแล้ว
+  Storage->>Storage: ลบ cityName
+  Storage->>LocalStorage: บันทึกรายการ
+end
+
+Storage-->>Main: บันทึกเรียบร้อย
+Main->>FavoritesView: updateFavButton(cityName)
+Main->>FavoritesView:  renderChips(activeCity)
+FavoritesView-->>User: Render UI
+```
