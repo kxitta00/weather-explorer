@@ -1,116 +1,144 @@
-# สถาปัตยกรรมระบบ (Architecture Overview)
+# Architecture Overview
 
-> เอกสารถอดรหัสการทำงานของระบบ Weather Explorer เรียบเรียงจากกระบวนการคิดจริง (Thought Process) และไล่ตามลำดับการเดินทางของข้อมูลในสถาปัตยกรรมแบบ **Event-Driven Architecture**
+เอกสารนี้อธิบายหน้าที่ของแต่ละไฟล์ ความสัมพันธ์ระหว่างโมดูล และการไหลของข้อมูลในโปรเจกต์ Weather Explorer
 
----
+## 1. ไฟล์อิสระที่ไม่ import โมดูลอื่น
 
-## 1. ภาพรวมสถาปัตยกรรม: ทำความเข้าใจ Event-Driven Architecture
+### `src/provinces.ts`
 
-ในหน้าเว็บที่มี DOM โค้ดไม่ได้ทำงานแบบอ่านหนังสือจากบนลงล่างตลอดเวลา (Linear Execution) แต่วงจรชีวิตของระบบถูกแบ่งออกเป็น **2 ช่วงเวลาหลัก**:
+- **Responsibility:** แปลงชื่อจังหวัด/ชื่อเมืองภาษาไทยหรือคำย่อ ให้เป็นชื่อภาษาอังกฤษสากล
+- **Input:** `input: string` — ชื่อเมืองที่ส่งมาจาก `main.ts`
+- **Output:** `string` — ชื่อเมืองภาษาอังกฤษ
+- **Dependencies:** ไม่มี (ไม่พึ่งพาโมดูลอื่น)
+- **State / Side effects:** ไม่มี — เป็น Pure Function / Stateless
 
-1. **ช่วงเปิดเว็บ (Setup & Bootstrap Phase):**
-   - เบราว์เซอร์จะกวาดอ่านโค้ดใน `main.ts` จากบนลงล่างรอบเดียวเพื่อจำ Element, เตรียมฟังก์ชัน, และตั้งด่านตรวจ (Event Listeners)
-   - เมื่ออ่านมาชน 2 บรรทัดสุดท้าย จะสั่งเริ่มทำงานทันที (Bootstrap):
-     ```typescript
-     renderChips();           // ปั๊มปุ่มชิปเมืองโปรดขึ้นหน้าจอ
-     loadWeather("Bangkok");  // โหลดสภาพอากาศกรุงเทพฯ เป็นค่าเริ่มต้น
-     ```
-2. **ช่วงรอคำสั่ง (Event-Driven Phase):**
-   - หลังจากโหลดหน้าแรกเสร็จ ระบบจะเข้าสู่โหมด **"หลับเพื่อรอดักฟังคำสั่งจากผู้ใช้ (Waiting for Events)"**
-   - เมื่อผู้ใช้มีการคลิกหรือพิมพ์ โค้ดจะกระโดดจาก Event Listener ด้านล่าง ย้อนขึ้นไปเรียกฟังก์ชันประมวลผลข้างบนเสมอ
+### `src/types.ts`
 
----
+- **Responsibility:** กำหนดโครงสร้างข้อมูลเข้าและออกของระบบ
+- **Input:** ไม่มี
+- **Output:** `export type` ส่งไปให้ไฟล์ต่าง ๆ ที่ต้องการใช้
+- **Dependencies:** ไม่มี
+- **State / Side effects:** ไม่มี
 
-## 2. การเดินทางของข้อมูลเมื่อผู้ใช้ค้นหาเมือง (Data Pipeline Walkthrough)
+### `src/storage.ts`
 
-สมมติสถานการณ์จริง: **ผู้ใช้พิมพ์คำว่า "โคราช" ลงในช่องค้นหา แล้วกดปุ่ม Enter**
+- **Responsibility:** เก็บข้อมูลเมืองโปรดไว้ใน LocalStorage โดยเรียกใช้เป็นข้อมูลตั้งต้นตอนเปิดหน้าเว็บ เพิ่ม หรือลบข้อมูลได้
+- **Input:**
+  - `getFavorites()`: ไม่มี input
+  - `saveFavorite(cityName: string)`: รับชื่อเมืองเพื่อเพิ่มหรือลบ
+- **Output:**
+  - `getFavorites(): string[]` — คืนอาเรย์รายชื่อเมือง
+  - `saveFavorite(): void` — บันทึกข้อมูลลง LocalStorage โดยไม่คืนค่า
+- **Dependencies:** Browser APIs: `localStorage`, `alert`, `console`
+- **State / Side effects:** อ่าน/เขียนข้อมูลลง Browser LocalStorage และแจ้งเตือนกรณีผู้ใช้บันทึกชื่อเมืองเกิน 4 เมือง
 
-### สเต็ปที่ 1: ดักจับสัญญาณและดูดข้อมูล (Event & Extraction)
-- ตัวดักฟัง `searchFormEl.addEventListener("submit")` ที่ตั้งรอไว้ตรวจจับได้ว่าฟอร์มถูกส่ง
-- สั่ง `e.preventDefault()` เพื่อห้ามไม่ให้เบราว์เซอร์รีเฟรชหน้าเว็บ
-- **จังหวะดูดข้อมูล:** เอื้อมมือไปควักตัวหนังสือในช่องค้นหาออกมาเก็บไว้ในตัวแปร `query` ผ่านคำสั่ง `searchInputEl.value.trim()`
-- ส่งไม้ต่อให้ฟังก์ชัน `loadWeather(query)` แล้วล้างข้อความในช่องค้นหาให้ว่าง
+## 2. ไฟล์ logic และดึงข้อมูลจากภายนอก
 
-### สเต็ปที่ 2: สั่งขึ้นตัวหมุน Loading บนหน้าจอ
-- เมื่อเข้ามาในฟังก์ชัน `loadWeather(cityName)` สิ่งแรกที่ทำคือเปลี่ยนสถานะกลาง:
-  `state = { status: "loading" }`
-- สั่งเรียก `render()` ทันที ➔ หน้าจอจะวิ่งเข้า `case "loading"` สั่งซ่อนการ์ดสภาพอากาศเดิมทิ้ง แล้วขึ้นไอคอนหมุนติ้วๆ บอกผู้ใช้ว่าระบบกำลังทำงาน
+### `src/api.ts`
 
-### สเต็ปที่ 3: เข้าบล็อก `try` เพื่อยิงขอข้อมูลสดจากภายนอก
-- **ไม้แรก:** โยนชื่อเมือง `"โคราช"` เข้าฟังก์ชัน `searchCity()` (ใน `api.ts`) ➔ แปลงเป็นภาษาอังกฤษ `"Nakhon Ratchasima"` และค้นหาพิกัดละติจูด/ลองจิจูด
-- **ไม้สอง:** นำพิกัดที่ได้โยนเข้าฟังก์ชัน `getForecast()` (ใน `api.ts`) ➔ ยิงขอข้อมูลสภาพอากาศสดและพยากรณ์ 7 วันจาก Open-Meteo API
-- **ไม้สาม (Data Cleansing):** นำข้อมูลดิบ (JSON) จาก API มาปั้นให้เป็นก้อนข้อมูลตามโครงสร้าง `type Weather` ที่คลีนเรียบร้อย:
-  - แปลงรหัสสภาพอากาศให้เป็นคำอธิบายภาษาไทยและชื่อไอคอน FontAwesome ผ่าน `getWeatherInfo` (รองรับทั้งกลางวันและกลางคืนทุกสภาพอากาศ)
-  - แปลงวันที่ให้เป็นชื่อวันย่อภาษาไทย ("วันนี้", "จ.", "อ.") ผ่าน `formatDayName`
+- **Responsibility:** นำชื่อเมือง `cityName` ไปขอข้อมูล latitude/longitude เพื่อนำไปขอข้อมูลสภาพอากาศ JSON ต่อ
+- **Input:**
+  - `searchCity(cityName: string)`: รับชื่อเมืองภาษาอังกฤษ
+  - `getForecast(latitude: number, longitude: number)`: รับค่าพิกัดละติจูดและลองจิจูด
+- **Output:**
+  - `searchCity()`: ข้อมูล `{ name, latitude, longitude }`
+  - `getForecast()`: ข้อมูล forecast JSON ดิบจาก API ซึ่ง `main.ts` นำไปใช้เป็น `ForecastResponse`
+- **Dependencies:** `types.ts` สำหรับ `GeocodingResponse` และ Browser `fetch`
+- **State / Side effects:** `searchCity` และ `getForecast` มีการยิง request ไปยัง network
 
-### สเต็ปที่ 4: โหลดสำเร็จ สั่งวาดข้อมูลจริงลงจอ (Happy Path)
-- สับสวิตช์สถานะกลาง: `state = { status: "success", data: weather }`
-- สั่งเรียก `render()` อีกรอบ ➔ คราวนี้เข้า `case "success"` สั่งปิดตัวหมุน เปิดกล่องเนื้อหาหลัก แล้วส่งต่อข้อมูลให้แต่ละ View วาดหน้าจอ
+### `src/utils.ts`
 
-### สเต็ปสำรอง: กรณีเกิดข้อผิดพลาด (Unhappy Path & Safety Net)
-- หากเกิดปัญหาในบล็อก `try` (เช่น พิมพ์ชื่อเมืองมั่วแล้วหาไม่พบ หรือเน็ตหลุด) ระบบจะดีดตัวลงมาที่บล็อก `catch (error)` ทันที
-- สกัดข้อความแจ้งเตือนที่เข้าใจง่ายออกมา (`const message = ...`)
-- สับสวิตช์สถานะกลาง: `state = { status: "error", message }`
-- สั่งเรียก `render()` ➔ เข้า `case "error"` สั่งซ่อนการ์ดทั้งหมด แล้วพ่นข้อความสีแดงแจ้งเตือนผู้ใช้บนหน้าจออย่างสุภาพ (Graceful Degradation)
+- **Responsibility:** รวม pure logic หลาย ๆ ตัว
+  1. `getWeatherInfo` นำ code ที่ได้จาก JSON มาแปลงเป็นคำบรรยายสภาพอากาศและไอคอน FontAwesome สำหรับแสดงบน UI
+  2. `calculateWeeklyStats` หาค่าสูงสุด ต่ำสุด และค่าเฉลี่ยจาก temp ที่ได้จาก JSON โดยใช้ `reduce`
+  3. `formatDayName` แปลงวันที่ที่ได้จาก JSON มาเป็นวัน
+  4. `getHumidityDesc` แปลงความชื้นที่ได้จาก JSON มาเป็นสถานะ
+  5. `getWindDesc` แปลงแรงลมที่ได้จาก JSON มาเป็นสถานะ
+  6. `getFeelsLikeDesc` แปลงความรู้สึกจากสภาพอากาศที่ได้จาก JSON มาเป็นสถานะ
+  7. `getUvDesc` แปลง UV ที่ได้จาก JSON มาเป็นสถานะ
+- **Input:** ข้อมูลสภาพอากาศจาก `main.ts` เป็นส่วนใหญ่
+  1. code สภาพอากาศ และ `is_day`
+  2. `maxTemps: number[]`, `minTemps: number[]`
+  3. `dateStr: string`, `index: number`
+  4. `humidity: number`
+  5. `speed: number`
+  6. `temp: number`
+  7. `uv: number`
+- **Output:** ข้อมูลที่ผ่านการแปลงจาก JSON ไปเป็นข้อความสถานะ หรือข้อมูลเพื่อนำไปวาดจอ
+  1. ข้อมูลสภาพอากาศ type `WeatherInfo` — คำบรรยายและไอคอน
+  2. ข้อมูลอุณหภูมิ type `WeeklyStats`
+  3. ข้อความวันที่
+  4. ข้อความสถานะความชื้น
+  5. ข้อความสถานะแรงลม
+  6. ข้อความสถานะความรู้สึกได้
+  7. ข้อความสถานะ UV
+- **Dependencies:** `types.ts` สำหรับกำหนดโครงสร้างข้อมูลบางอย่าง
+- **State / Side effects:** ไม่มี — เป็น Pure Functions (โดย `formatDayName` อาศัย timezone ของ browser เพื่อแปลงวันที่)
 
----
+## 3. ไฟล์วาดหน้าจอ
 
-## 3. หน้าที่ของแต่ละ View (Separation of Concerns)
+### `src/weatherView.ts`
 
-เพื่อให้โค้ดสะอาดและไม่ผูกติดกัน ระบบได้แยกความรับผิดชอบของการวาดหน้าจอออกเป็นโมดูลอิสระ:
+- **Responsibility:** นำข้อมูลมาวาดหน้าจอในส่วน Hero, Weekly Stats และ Forecast Grid การ์ด 7 ใบ
+- **Input:** รับข้อมูลจาก `main.ts` เป็น `data: Weather` ที่ปั้นเสร็จแล้วพร้อมหยอดลงช่องในหน้าจอ
+- **Output:** คืนค่า `void` และทำ side effect โดยวาดข้อมูลลง DOM
+  1. **Hero**
+     - `cityNameEl.textContent` วาดชื่อเมือง
+     - `currTempEl.textContent` วาดอุณหภูมิ
+     - `weatherDesEl.textContent` วาดคำอธิบายสถานะสภาพอากาศ
+     - `dateEl.textContent` วาดวันปัจจุบันที่ user เปิดดู
+     - `heroIconEl.className` วาดไอคอนใหญ่ FontAwesome ที่ `main.ts` คำนวณไว้แล้วใน `data.icon`
+     - `humidityEl.textContent` วาดเลขสถานะความชื้น
+     - `humidityDescEl.textContent` วาดสถานะบรรยายความชื้นจาก `getHumidityDesc`
+     - `windEl.textContent` วาดเลขสถานะแรงลม
+     - `windDescEl.textContent` วาดสถานะบรรยายแรงลมจาก `getWindDesc`
+     - `feelsEl.textContent` วาดเลขสถานะความรู้สึกจากสภาพอากาศ
+     - `feelsLikeDescEl.textContent` วาดสถานะบรรยายความรู้สึกจาก `getFeelsLikeDesc`
+     - `uvEl.textContent` วาดเลขสถานะ UV
+     - `uvDescEl.textContent` วาดสถานะบรรยาย UV จาก `getUvDesc`
+  2. **Weekly Stats**
+     - `#weekly-max` วาดอุณหภูมิสูงสุดใน 7 วัน (`temps.max`)
+     - `#weekly-min` วาดอุณหภูมิต่ำสุดใน 7 วัน (`temps.min`)
+     - `#weekly-avg` วาดอุณหภูมิเฉลี่ยทั้งสัปดาห์ (`temps.avg`)
+  3. **Forecast Grid (การ์ดพยากรณ์ 7 วัน)**
+     - ใช้ `.map()` วนลูปสร้างการ์ด 7 ใบ ดึง icon ประจำวันจาก `getWeatherInfo` และแปะคลาส `active` สำหรับรายการแรก
+- **Dependencies:**
+  - `types.ts` — ใช้ type `Weather`
+  - `utils.ts` — ใช้ `calculateWeeklyStats`, `getWeatherInfo` และฟังก์ชันตัดเกรด 4 สถานะ
+- **State / Side effects:** ไม่มี state ภายใน แต่เป็น Impure Function เพราะดึงและแก้ไข DOM
 
-### 3.1 `renderWeather(data: Weather)` ใน `src/weatherView.ts`
-ทำหน้าที่วาดข้อมูลสภาพอากาศเพียวๆ โดยรับก้อนข้อมูลที่ปั้นเสร็จแล้วไปหยอดลงใน 3 ส่วน:
+### `src/favoritesView.ts`
 
-1. **ส่วน Hero Card (ข้อมูลสภาพอากาศสด & ตัวบอกสถานะไดนามิก):**
-   - หยอดตัวเลขสภาพอากาศ: อุณหภูมิ, สภาพอากาศ, ความชื้น, ความเร็วลม, ความรู้สึกจริง, ค่า UV และวันที่ภาษาไทยอัตโนมัติ
-   - **ระบบคำนวณสถานะไดนามิก 4 จุด:** เลิกใช้ข้อความ Hardcoded แต่ประเมินจากตัวเลขจริงผ่านฟังก์ชันใน `utils.ts`:
-     - ความชื้น (`#humidity-desc`): ผ่าน `getHumidityDesc` (อากาศแห้ง / กำลังสบาย / ค่อนข้างชื้น)
-     - แรงลม (`#wind-desc`): ผ่าน `getWindDesc` (ลมสงบ / ลมเบา-ปานกลาง / ลมแรง)
-     - รู้สึกเหมือน (`#feels-like-desc`): ผ่าน `getFeelsLikeDesc` (อากาศเย็น / สบายตัว / ร้อนอบอ้าว / ร้อนจัด)
-     - ดัชนี UV (`#uv-desc`): ผ่าน `getUvDesc` (ต่ำ / ปานกลาง / สูง / สูงมาก / อันตรายสุดขีด)
-   - สลับคลาสไอคอนตัวใหญ่ข้างอุณหภูมิ (`heroIconEl.className = ...`) ตามสภาพอากาศสด รองรับทั้งกลางวันและกลางคืนครบทุกรหัส (ฟ้าโปร่ง, มีเมฆ, หมอก, ฝนตก, พายุ)
-2. **ส่วนสถิติประจำสัปดาห์ (Weekly Stats):**
-   - ใช้ `.map()` สกัดอุณหภูมิสูงสุดและต่ำสุดตลอด 7 วัน
-   - ส่งให้อัลกอริทึม `calculateWeeklyStats` คำนวณหาค่าสูงสุด (Max), ค่าต่ำสุด (Min) และอุณหภูมิเฉลี่ย (Avg)
-   - แปะตัวเลขสรุปลงบนแถบสถิติ
-3. **ส่วนการ์ดพยากรณ์ 7 วัน (7-Day Forecast Grid):**
-   - ใช้ `.map()` วนลูปข้อมูลพยากรณ์ 7 วัน ปั๊มโครงสร้าง HTML ของการ์ดแต่ละใบ
-   - ดึงไอคอนประจำวันจาก `getWeatherInfo(f.weatherCode)`
-   - กำหนดให้การ์ดวันแรก (`index === 0`) มีคลาส `.active`
-   - รวบทุกการ์ดด้วย `.join("")` แล้วยัดลง `forecastGridEl.innerHTML`
+- **Responsibility:** ดูแลการแสดงผลหน้าตา UI ของปุ่มเมืองโปรดทั้งหมด: วาดแถบชิปรายการโปรด และสลับสถานะปุ่มกดบันทึกใต้ชื่อเมือง โดยไม่มีการจัดการข้อมูลเอง
+- **Input:**
+  1. `renderChips(activeCity?: string)`: รับชื่อเมืองปัจจุบัน (optional) จาก `main.ts` เพื่อนำไปไฮไลต์สีฟ้า
+  2. `upadateFavButton(cityName: string)`: รับชื่อเมืองปัจจุบันจาก `main.ts` เพื่อเช็คสถานะการบันทึก
+- **Output:**
+  1. `renderChips(activeCity?: string)`: คืนค่า `void` และนำรายชื่อเมืองจาก storage มาวนลูปสร้างแท็ก `<button class="chip">` หยอดลงใน `#favorite-chips`
+  2. `upadateFavButton(cityName: string)`: คืนค่า `void` และสลับคลาส `.active` พร้อมข้อความ/ไอคอนของ `#fav-toggle-btn` ระหว่าง “บันทึกแล้ว” กับ “เพิ่มในรายการโปรด”
+- **Dependencies:** `src/storage.ts` — เรียกใช้ `getFavorites` เพื่ออ่านข้อมูลเมือง
+- **State / Side effects:** ไม่มี state ภายใน เป็น Impure Functions เพราะอ่าน LocalStorage ภายนอกและแก้ไข HTML DOM
 
----
+## 4. ไฟล์ใหญ่ตัวคุมหลัก
 
-### 3.2 ระบบเมืองโปรด ใน `src/favoritesView.ts`
+### `src/main.ts`
 
-รับผิดชอบการจัดการหน้าตาของปุ่มและชิปเมืองโปรดทั้งหมด:
-
-#### `upadateFavButton(cityName: string)`
-- นำชื่อเมืองที่กำลังเปิดดูอยู่ไปตรวจสอบใน LocalStorage ผ่าน `getFavorites().includes(cityName)`
-- **กรณีมีเมืองนี้อยู่แล้ว:** สลับข้อความเป็น `"บันทึกแล้ว"` และเติมคลาส `.active` (สีฟ้า)
-- **กรณีเป็นเมืองใหม่:** สลับข้อความเป็น `"เพิ่มในรายการโปรด"` และเอาคลาส `.active` ออก
-
-#### `renderChips(activeCity?: string)`
-- ดึงรายการเมืองโปรดทั้งหมดจาก LocalStorage มาปั๊มเป็นปุ่มชิปด้วย `.map()` และ `.join("")`
-- **การดักจับข้อผิดพลาด (Guard Clause):**
-  - ใส่ `activeCity && ...` ไว้ข้างหน้า เพื่อเช็คว่ามีชื่อเมืองส่งมาจริงๆ หรือไม่ ป้องกันไม่ให้แอปแครชจอขาวตอนเปิดเว็บครั้งแรกที่ `activeCity` ยังเป็น `undefined`
-- **การเปรียบเทียบแบบไม่สนตัวพิมพ์เล็ก-ใหญ่ (Case-Insensitive):**
-  - จับชื่อเมืองทั้ง 2 ฝั่งแปลงเป็นตัวพิมพ์เล็กผ่าน `.toLocaleLowerCase()` ก่อนนำมาเทียบด้วย `===`
-  - นำ **เมืองปัจจุบันที่เปิดดูอยู่ (`activeCity`)** ไปเทียบกับ **เมืองที่มีอยู่ในลิ้นชัก (`name`)** ทีละตัว
-  - ถ้าตัวไหนตรงกัน จะได้ค่า `true` แล้วเติมคลาส `.active` เพื่อให้ CSS ระบายสีฟ้าสดใสลงบนปุ่มชิปของเมืองนั้น
-
----
-
-## 4. สรุปความรับผิดชอบของแต่ละโมดูล (Module Responsibilities)
-
-| ไฟล์ | หน้าที่หลักตามสถาปัตยกรรม |
-| :--- | :--- |
-| **`src/types.ts`** | ข้อตกลงโครงสร้างข้อมูลทั้งหมด (`Weather`, `ForecastResponse`, `AsyncState`) |
-| **`src/api.ts`** | เชื่อมต่อเครือข่ายภายนอก (Open-Meteo Geocoding & Forecast) |
-| **`src/provinces.ts`** | พจนานุกรมแปลชื่อ 77 จังหวัดภาษาไทยเป็นภาษาอังกฤษ |
-| **`src/utils.ts`** | Pure Functions แปลงรหัสไอคอน (กลางวัน/กลางคืน), ฟังก์ชันประเมินระดับ 4 สถานะ (ความชื้น/ลม/ความรู้สึก/UV), คำนวณสถิติ และแปลงวันที่ภาษาไทย |
-| **`src/storage.ts`** | อ่าน/เขียนข้อมูลลง Browser LocalStorage พร้อมระบบเช็คโควตาและความปลอดภัย |
-| **`src/weatherView.ts`** | วาดหน้าต่างสภาพอากาศ (Hero Card + 4 สถานะไดนามิก, Summary Stats, 7-Day Forecast Grid) |
-| **`src/favoritesView.ts`** | วาดและปรับสถานะของปุ่มชิปเมืองโปรด และปุ่มบันทึกบน Hero Card |
-| **`src/main.ts`** | **Orchestrator กลาง** คุม State Machine, ดัก Event Listeners และสั่งงาน View |
+- **Responsibility:** เป็นจุดเริ่มของเว็บ รอฟังค่าจาก user เรียกใช้ฟังก์ชันอื่น ๆ เพื่อหาข้อมูล และสั่งวาดจอตามสถานะ `state`
+- **Input:**
+  1. **User events:** พิมพ์ชื่อเมือง, คลิกปุ่มเมืองโปรด, บันทึก, ลบ หรือกดดูเมือง
+  2. **External data:** ข้อมูลสภาพอากาศ JSON จาก API และข้อมูลเมืองโปรดที่อ่านผ่าน `storage.ts`
+- **Output:**
+  1. `render(): void` เปลี่ยนหน้าตาของเว็บระหว่าง `idle`, `loading`, `error` หรือ `success`
+  2. สั่ง `storage.ts` บันทึกเมืองโปรด และสั่ง View อัปเดต DOM
+- **Core Engine:**
+  1. `render(): void` ดูตัวแปร `state` ว่าตอนนี้เป็นอะไร แล้วสั่งเปิด/ปิด/วาดหน้าจอ
+  2. `loadWeather(cityName): Promise<void>` สับ state เป็น loading → แปลงชื่อไทยเป็นอังกฤษ → ยิงขอพิกัด → ยิงขอสภาพอากาศ → ปั้นก้อนข้อมูล `Weather` → สับ state เป็น success → สั่ง `render()`
+- **Dependencies:**
+  - `searchCity`, `getForecast` จาก `api.ts`
+  - `formatDayName`, `getWeatherInfo` จาก `utils.ts`
+  - `saveFavorite` จาก `storage.ts`
+  - `Weather`, `AsyncState`, `ForecastResponse` จาก `types.ts`
+  - `renderWeather` จาก `weatherView.ts`
+  - `renderChips`, `upadateFavButton` จาก `favoritesView.ts`
+  - `toEnglishCity` จาก `provinces.ts`
+- **State / Side effects:** `state: AsyncState<Weather>` เป็นแหล่งข้อมูลกลางของสถานะการโหลดและข้อมูลอากาศที่กำลังแสดง ส่วนรายการเมืองโปรดเก็บใน LocalStorage; module นี้ประสาน side effects เช่น network, DOM และ LocalStorage ผ่านโมดูลต่าง ๆ
