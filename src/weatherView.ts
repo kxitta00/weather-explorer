@@ -1,6 +1,7 @@
 import { type Weather } from "./types";
 import { calculateWeeklyStats, getWeatherInfo } from "./utils";
 import { getHumidityDesc, getWindDesc, getFeelsLikeDesc, getUvDesc } from "./utils";
+
 const forecastGridEl = document.getElementById('forecast-grid') as HTMLElement;
 const heroIconEl = document.querySelector('.weather-hero-icon') as HTMLElement;
 

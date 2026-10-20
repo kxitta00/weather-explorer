@@ -142,3 +142,42 @@
   - `renderChips`, `upadateFavButton` จาก `favoritesView.ts`
   - `toEnglishCity` จาก `provinces.ts`
 - **State / Side effects:** `state: AsyncState<Weather>` เป็นแหล่งข้อมูลกลางของสถานะการโหลดและข้อมูลอากาศที่กำลังแสดง ส่วนรายการเมืองโปรดเก็บใน LocalStorage; module นี้ประสาน side effects เช่น network, DOM และ LocalStorage ผ่านโมดูลต่าง ๆ
+
+## 5. Sequence Diagrams
+### 5.1 Search and render weather
+```mermaid
+sequenceDiagram
+actor User
+participant Main as main.ts
+participant Province as provinces.ts
+participant API as api.ts
+participant Geo as Open-Meteo Geocoding API
+participant Forecast as Open-Meteo Forecast API
+participant WeatherView as weatherView.ts
+participant FavoritesView as favoritesView.ts
+
+User->>Main: Submit form
+Main->>Main: Read and trim search input
+Main->>Main: loadWeather(query)
+Main->>Main: state = loading
+Main->>Main: render()
+Main->>Province: toEnglishCity(cityName)
+Province-->>Main: englishName
+Main->>API: searchCity(englishName)
+API->>Geo: fetch city
+Geo-->>API: Geocoding JSON
+API-->>Main: city coordinates
+Main->>API: getForecast (latitude, longitude)
+API->>Forecast: Fetch forecast
+Forecast-->>API: Forecast JSON
+API->>Main: Forecast JSON
+Main->>Main: ปั้นข้อมูลเป็น Weather
+Main->>Main: state = success
+Main->>Main: render()
+Main->>WeatherView: renderWeather(weather)
+Main->>FavoritesView: upadateFavButton(cityName)
+Main->>FavoritesView: renderChips(cityName)
+WeatherView-->>User: Updated weather UI
+```
+### 5.2 Favorite Toggle Flow
+- ค่อยแวะมาฝึกแกะอีก
