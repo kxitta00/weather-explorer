@@ -186,14 +186,14 @@ alt พบเมือง
     API-->>Main: Error
     Main->>Main: state = error
     Main->>Main: render()
-    WeatherView-->>User: แสดงข้อความผิดพลาด
+    Main-->>User: แสดงข้อความผิดพลาด
   end
 
 else ไม่พบเมือง หรือ Geocoding API ผิดพลาด
   API-->>Main: Error
   Main->>Main: state = error
   Main->>Main: render()
-  WeatherView-->>User: แสดงข้อความผิดพลาด
+  Main-->>User: แสดงข้อความผิดพลาด
 end
 ```
 ### 5.2 Favorite Toggle Flow
